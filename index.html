@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Veo Akechi ( Generate All Ratio)</title>
+    <link rel="stylesheet" href="index.css" />
+    <script src="https://unpkg.com/@ffmpeg/ffmpeg@0.12.10/dist/umd/ffmpeg.js"></script>
+    <script src="https://unpkg.com/@ffmpeg/util@0.12.1/dist/umd/index.js"></script>
+    <script type="importmap">
+      {
+        "imports": {
+          "@google/genai": "https://esm.sh/@google/genai@^1.4.0"
+        }
+      }
+    </script>
+    <script type="module" src="index.tsx"></script>
+  <link rel="stylesheet" href="/index.css">
+</head>
+  <body>
+    <main class="container">
+      <header>
+        <h1>VEO AKECHI 1.0</h1>
+        <p>
+          <i>it's not an important application, use it wisely so it doesn't become a sin for application makers</i>
+        </p>
+      </header>
+
+      <div class="content-wrapper">
+        <div class="source-image-container">
+            <h3>Source Image</h3>
+            <img alt="Source Image" id="source-image" />
+            <input type="file" id="image-upload-input" accept="image/png, image/jpeg" hidden/>
+            <label for="image-upload-input" id="upload-button" class="button">
+              <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M440-200h80v-167l64 64 56-57-160-160-160 160 57 57 63-64v167ZM240-80q-33 0-56.5-23.5T160-160v-640q0-33 23.5-56.5T240-880h320l240 240v480q0 33-23.5 56.5T720-80H240Zm280-520v-200H240v640h480v-440H520Z"/></svg>
+              <span>Upload New Image</span>
+            </label>
+        </div>
+
+        <div class="controls">
+            <div class="control-group">
+                <label for="prompt-input">Prompt</label>
+                <textarea
+                  id="prompt-input"
+                  type="text"
+                  placeholder="Enter a descriptive prompt..."
+                  rows="3"
+                ></textarea>
+            </div>
+
+            <div class="control-group">
+                <label for="negative-prompt-input">Negative Prompt (Optional)</label>
+                <textarea
+                  id="negative-prompt-input"
+                  type="text"
+                  placeholder="e.g., blurry, low quality, text, watermark"
+                  rows="2"
+                ></textarea>
+            </div>
+
+            <div class="control-group checkbox-group">
+              <input type="checkbox" id="remove-watermark-checkbox">
+              <label for="remove-watermark-checkbox">Remove Watermark</label>
+            </div>
+
+            <div class="control-group">
+                <label for="aspect-ratio-select">Aspect Ratio</label>
+                <select id="aspect-ratio-select">
+                    <option value="9:16">9:16 (Portrait for TikTok/Reels)</option>
+                    <option value="16:9">16:9 (Landscape for YouTube)</option>
+                    <option value="1:1">1:1 (Square for Instagram Post)</option>
+                    <option value="4:3">4:3 (Standard Video)</option>
+                    <option value="3:4">3:4 (Portrait for Social Media)</option>
+                </select>
+            </div>
+
+            <div class="control-group">
+                <label for="duration-select">Duration</label>
+                <select id="duration-select">
+                    <option value="5">5 seconds</option>
+                    <option value="8" selected>8 seconds</option>
+                </select>
+            </div>
+
+             <div class="control-group">
+                <label>Sound (Optional)</label>
+                <div id="audio-input-container">
+                    <input type="file" id="audio-upload-input" accept="audio/*" hidden/>
+                    <label for="audio-upload-input" id="upload-audio-button" class="button">
+                        <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M240-80q-33 0-56.5-23.5T160-160v-160h80v160h480v-160h80v160q0 33-23.5 56.5T720-80H240Zm240-200-180-180 56-56 84 84V-760h80v288l84-84 56 56-180 180Z"/></svg>
+                        <span>Upload</span>
+                    </label>
+                    <span class="separator-text">or</span>
+                    <input type="text" id="audio-url-input" placeholder="Paste audio URL">
+                </div>
+                 <div id="audio-info" style="display: none;">
+                    <span class="audio-icon"><svg xmlns="http://www.w3.org/2000/svg" height="20px" viewBox="0 -960 960 960" width="20px" fill="currentColor"><path d="M280-480q-50 0-85-35t-35-85q0-50 35-85t85-35q50 0 85 35t35 85q0 50-35 85t-85 35Zm0 200q-116 0-198-82t-82-198q0-117 82-198.5T280-840q116 0 198 81.5T560-560q0 117-82 198.5T280-280Zm0-80q83 0 141.5-58.5T480-560q0-83-58.5-141.5T280-760q-83 0-141.5 58.5T80-560q0 83 58.5 141.5T280-360ZM720-80l-120-120q-21 14-44.5 24.5T510-62q-17 4-33 4-27 0-48-9.5T390-80l-60 60q-15 15-35.5 15T260-20q-15-15-15-35.5T260-90l60-60q-13-16-22-35.5T380-230q-2-16-2-33 0-23 6-44.5T400-352L280-472q-15-15-15-35.5t15-35.5q15-15 35.5-15t35.5 15l632 632q15 15 15 35.5T911-80q-15 15-35.5 15t-35.5-15Z"/></svg></span>
+                    <span id="audio-name"></span>
+                    <button type="button" id="remove-audio-button" aria-label="Remove audio file">&times;</button>
+                </div>
+            </div>
+
+            <button id="generate-button">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="m380-80-10-185q-20-8-39-18t-37-22L120-222l-100-174 152-123q-2-9-2.5-20.5T170-600q0-9 .5-20.5T172-644L20-767l100-174 174 83q18-12 37-22t39-18l10-185h200l10 185q20 8 39 18t37 22l174-83 100 174-152 123q2 9 2.5 20.5T790-600q0 9-.5 20.5T788-556l152-123 100 174-174 83q-18 12-37 22t-39 18l-10 185H380Zm100-260q83 0 141.5-58.5T680-600q0-83-58.5-141.5T480-800q-83 0-141.5 58.5T280-600q0 83 58.5 141.5T480-340Z"/></svg>
+                <span>Generate Video</span>
+            </button>
+        </div>
+      </div>
+
+      <div class="results-area">
+        <div class="main-result-panel">
+            <h3>Result</h3>
+            <div id="result-container" class="result-container" aria-live="polite">
+                <div id="status" class="status"></div>
+                <div id="quota-error" class="error">
+                  <p>Veo is available with limited free generations per day for testing. You have exceeded your daily quota.</p>
+                  <p>To continue, please <button id="open-key">add your paid API key</button>.</p>
+                </div>
+                <div class="video-wrapper">
+                    <video id="video" autoplay loop controls muted playsinline></video>
+                    <a id="download-button" class="button" download="generated-video.mp4" style="display: none;">
+                      <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor"><path d="M480-320 280-520l56-58 104 104v-326h80v326l104-104 56 58-200 200ZM240-160q-33 0-56.5-23.5T160-240v-120h80v120h480v-120h80v120q0 33-23.5 56.5T720-160H240Z"/></svg>
+                      <span>Download Video</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="history-panel">
+            <h3>History</h3>
+            <div id="history-grid" class="history-grid">
+                <!-- History items will be injected here -->
+            </div>
+        </div>
+      </div>
+    </main>
+    <footer>
+      <p>not copyright 2025</p>
+    </footer>
+  <script type="module" src="/index.tsx"></script>
+</body>
+</html>
